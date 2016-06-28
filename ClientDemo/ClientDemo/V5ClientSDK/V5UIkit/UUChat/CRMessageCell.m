@@ -8,8 +8,7 @@
 
 #import "CRMessageCell.h"
 #import "CRMessageFrame.h"
-#import "UIImageView+V5AFNetworking.h"
-#import "UIButton+V5AFNetworking.h"
+#import "V5ImageLoader.h"
 #import "V5Macros.h"
 #import "NSString+V5URL.h"
 #import "V5MBProgressHUD.h"
@@ -324,9 +323,11 @@
             placeholder = [UIImage imageNamed:IMGFILE(@"v5_avatar_robot")];
             break;
     }
-    [self.avatarImage setImageWithURL:[NSURL URLWithString:avatarURL]
-                     placeholderImage:placeholder
-                         failureImage:nil];
+    [V5ImageLoader setImageView:self.avatarImage
+                        withURL:avatarURL
+               placeholderImage:placeholder
+                   failureImage:nil];
+    
     self.avatarImage.frame = self.messageFrame.avatarF;
     [self.contentView addSubview:self.avatarImage];
 }
@@ -438,9 +439,10 @@
                 self.btnContent.backImageView.image = [(V5ImageMessage *)message image];
             } else {
                 NSString *picUrl = [V5Util getThumbnailURLOfImage:(V5ImageMessage *)message];
-                [self.btnContent.backImageView setImageWithURL:[NSURL URLWithString:picUrl]
-                                              placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
-                                                  failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
+                [V5ImageLoader setImageView:self.btnContent.backImageView
+                                    withURL:picUrl
+                           placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
+                               failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
             }
             
             self.btnContent.backImageView.frame = CGRectMake(0, 0, self.btnContent.frame.size.width, self.btnContent.frame.size.height);
@@ -458,9 +460,10 @@
             V5LocationMessage *locationMessage = (V5LocationMessage *)message;
             NSString *mapUrl = [NSString stringWithFormat:MAP_PIC_URL_FORMAT, locationMessage.x, locationMessage.y, locationMessage.x, locationMessage.y];
 //            V5Log(@"位置：%@", [mapUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
-            [self.btnContent.backImageView setImageWithURL:[NSURL URLWithString:[mapUrl URLEncodedString]]
-                                          placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
-                                              failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
+            [V5ImageLoader setImageView:self.btnContent.backImageView
+                                withURL:[mapUrl URLEncodedString]
+                       placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
+                           failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
             
             self.btnContent.backImageView.frame = CGRectMake(0, 0, self.btnContent.frame.size.width, self.btnContent.frame.size.height);
             [self makeMaskView:self.btnContent.backImageView withImage:normal];
@@ -583,7 +586,10 @@
 - (void)loadSingleArticle {
     V5Article *article = [[(V5ArticlesMessage *)self.messageFrame.message articles] objectAtIndex:0];
     if (!self.singleArticle) { // 创建单图文view
-        CGRect contentFrame = CGRectMake((Main_Screen_Width - ArticleContentW)/2, ChatMargin, ArticleContentW, ArticleContentH);
+        CGRect contentFrame = CGRectMake((Main_Screen_Width - ArticleContentW)/2,
+                                         self.messageFrame.showTime ? self.messageFrame.contentF.origin.y : ChatMargin,
+                                         ArticleContentW,
+                                         ArticleContentH);
         self.singleArticle = [[CRSingleArticleView alloc] initWithFrame:contentFrame];
         __block CRMessageCell *cellSelf = self;
         self.singleArticle.articleClickHandler = ^(NSString *url) {
@@ -596,6 +602,12 @@
                 [cellSelf.delegate cellLinkDidLongClick:cellSelf linkType:V5KZLinkTypeArticleURL link:url];
             }
         };
+    } else {
+        CGRect contentFrame = CGRectMake((Main_Screen_Width - ArticleContentW)/2,
+                                         self.messageFrame.showTime ? self.messageFrame.contentF.origin.y : ChatMargin,
+                                         ArticleContentW,
+                                         ArticleContentH);
+        self.singleArticle.frame = contentFrame;
     }
     [self.contentView addSubview:self.singleArticle];
     
@@ -609,7 +621,10 @@
 - (void)loadMultiArticles {
     NSArray<V5Article *> *articles = [(V5ArticlesMessage *)self.messageFrame.message articles];
     if (!self.multiArticles) { // 创建多图文view
-        CGRect contentFrame = CGRectMake((Main_Screen_Width - ArticleContentW)/2, ChatMargin, ArticleContentW, ArticleContentH);
+        CGRect contentFrame = CGRectMake((Main_Screen_Width - ArticleContentW)/2,
+                                         self.messageFrame.showTime ? self.messageFrame.contentF.origin.y : ChatMargin,
+                                         ArticleContentW,
+                                         ArticleContentH);
         self.multiArticles = [[CRMultiArticleView alloc] initWithFrame:contentFrame];
         __block CRMessageCell *cellSelf = self;
         self.multiArticles.articleClickHandler = ^(NSString *url) {
@@ -622,6 +637,12 @@
                 [cellSelf.delegate cellLinkDidLongClick:cellSelf linkType:V5KZLinkTypeArticleURL link:url];
             }
         };
+    } else {
+        CGRect contentFrame = CGRectMake((Main_Screen_Width - ArticleContentW)/2,
+                                         self.messageFrame.showTime ? self.messageFrame.contentF.origin.y : ChatMargin,
+                                         ArticleContentW,
+                                         ArticleContentH);
+        self.multiArticles.frame = contentFrame;
     }
     [self.contentView addSubview:self.multiArticles];
     

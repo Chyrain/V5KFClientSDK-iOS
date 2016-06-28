@@ -84,8 +84,8 @@
 		5976F8C01CBFB31400BB2C71 /* CRAVAudioPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5976F8BF1CBFB31400BB2C71 /* CRAVAudioPlayer.m */; };
 		5976F8C31CC0717000BB2C71 /* V5VoiceRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 5976F8C21CC0717000BB2C71 /* V5VoiceRecorder.m */; };
 		5976F8C61CC0726300BB2C71 /* V5VoiceMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 5976F8C51CC0726300BB2C71 /* V5VoiceMessage.m */; };
-		59B8DD331CEC5A2E000996D5 /* ChatNavigationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 59B8DD321CEC5A2E000996D5 /* ChatNavigationViewController.m */; };
 		59B8DD361CEC6B19000996D5 /* UIViewController+V5BackButtonHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 59B8DD351CEC6B19000996D5 /* UIViewController+V5BackButtonHandler.m */; };
+		59C1F23C1D00357200CD7F8F /* V5ImageLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 59C1F23B1D00357200CD7F8F /* V5ImageLoader.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -243,10 +243,10 @@
 		5976F8C21CC0717000BB2C71 /* V5VoiceRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = V5VoiceRecorder.m; sourceTree = "<group>"; };
 		5976F8C41CC0726300BB2C71 /* V5VoiceMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = V5VoiceMessage.h; sourceTree = "<group>"; };
 		5976F8C51CC0726300BB2C71 /* V5VoiceMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = V5VoiceMessage.m; sourceTree = "<group>"; };
-		59B8DD311CEC5A2E000996D5 /* ChatNavigationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatNavigationViewController.h; sourceTree = "<group>"; };
-		59B8DD321CEC5A2E000996D5 /* ChatNavigationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatNavigationViewController.m; sourceTree = "<group>"; };
 		59B8DD341CEC6B19000996D5 /* UIViewController+V5BackButtonHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+V5BackButtonHandler.h"; sourceTree = "<group>"; };
 		59B8DD351CEC6B19000996D5 /* UIViewController+V5BackButtonHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+V5BackButtonHandler.m"; sourceTree = "<group>"; };
+		59C1F23A1D00357200CD7F8F /* V5ImageLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = V5ImageLoader.h; sourceTree = "<group>"; };
+		59C1F23B1D00357200CD7F8F /* V5ImageLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = V5ImageLoader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -305,8 +305,6 @@
 				592667BB1C46555200F20E9D /* LaunchScreen.storyboard */,
 				592667BE1C46555200F20E9D /* Info.plist */,
 				592667AD1C46555200F20E9D /* Supporting Files */,
-				59B8DD311CEC5A2E000996D5 /* ChatNavigationViewController.h */,
-				59B8DD321CEC5A2E000996D5 /* ChatNavigationViewController.m */,
 			);
 			path = ClientDemo;
 			sourceTree = "<group>";
@@ -468,6 +466,8 @@
 				5976F8341CA514F300BB2C71 /* V5MBProgressHUD.m */,
 				5976F8351CA514F300BB2C71 /* V5VIPhotoView.h */,
 				5976F8361CA514F300BB2C71 /* V5VIPhotoView.m */,
+				59C1F23A1D00357200CD7F8F /* V5ImageLoader.h */,
+				59C1F23B1D00357200CD7F8F /* V5ImageLoader.m */,
 			);
 			path = V5UIkit;
 			sourceTree = "<group>";
@@ -704,12 +704,12 @@
 				5976F8671CA514F300BB2C71 /* CRMessageFrame.m in Sources */,
 				5976F86B1CA514F300BB2C71 /* CRStatusView.m in Sources */,
 				592667AF1C46555200F20E9D /* main.m in Sources */,
+				59C1F23C1D00357200CD7F8F /* V5ImageLoader.m in Sources */,
 				5976F8641CA514F300BB2C71 /* CRInsetsLabel.m in Sources */,
 				5976F8501CA514F300BB2C71 /* V5FMResultSet.m in Sources */,
 				5976F8661CA514F300BB2C71 /* CRMessageContentButton.m in Sources */,
 				5976F8691CA514F300BB2C71 /* CRProgressHUD.m in Sources */,
 				5976F8551CA514F300BB2C71 /* V5Util.m in Sources */,
-				59B8DD331CEC5A2E000996D5 /* ChatNavigationViewController.m in Sources */,
 				5976F8391CA514F300BB2C71 /* V5AFHTTPSessionManager.m in Sources */,
 				5976F8681CA514F300BB2C71 /* CRMultiArticleView.m in Sources */,
 				5976F8631CA514F300BB2C71 /* CRInputQuestionView.m in Sources */,

@@ -8,9 +8,9 @@
 
 #import "CRImageAvatarBrowser.h"
 #import "V5VIPhotoView.h"
-#import "UIImageView+V5AFNetworking.h"
 #import "NSString+V5URL.h"
 #import "V5Macros.h"
+#import "V5ImageLoader.h"
 
 static UIImageView *orginImageView;
 static UIView *backgroundView;
@@ -34,14 +34,19 @@ static UIView *backgroundView;
     [window addSubview:backgroundView];
     
     if (USE_THUMBNAIL && url) {
-        [photoView.imageView setImageWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[url URLEncodedString]]]
-                                   placeholderImage:image
-                                            success:^(NSURLRequest *request, NSHTTPURLResponse *response, UIImage *image) {
-                                           V5Log(@"加载大图完成：%@", url);
-                                           V5VIPhotoView *photoView=(V5VIPhotoView *)[backgroundView viewWithTag:1];
-                                           [photoView setImage:image];
-                                       }
-                                            failure:nil];
+        [V5ImageLoader setImageView:photoView.imageView
+                            withURL:[url URLEncodedString]
+                   placeholderImage:image
+                       failureImage:nil
+                          completed:^(UIImage *image, NSError *error, NSString *imageURL) {
+                              if (image && error == nil) { // success
+                                  V5Log(@"加载大图完成：%@", url);
+                                  V5VIPhotoView *photoView=(V5VIPhotoView *)[backgroundView viewWithTag:1];
+                                  [photoView setImage:image];
+                              } else { // failure
+                                  
+                              }
+                          }];
     }
     
     UITapGestureRecognizer *tap=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(hideImage:)];

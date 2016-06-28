@@ -179,7 +179,9 @@ V5KW_FIX_CATEGORY_BUG_M(UIImageView_V5AFNetworking)
 
             [[[strongSelf class] sharedImageCache] cacheImage:responseObject forRequest:urlRequest];
         } failure:^(V5AFHTTPRequestOperation *operation, NSError *error) {
-            V5Log(@"---- V5AFHTTPRequestOperation error:%@ ----", [error description]);
+            if (urlRequest.URL.absoluteString && ![urlRequest.URL.absoluteString isEqualToString:@""]) {
+                V5Log(@"URL:%@ -> V5AFHTTPRequestOperation error:%@", urlRequest.URL.absoluteString, [error description]);
+            }
             __strong __typeof(weakSelf)strongSelf = weakSelf;
             if ([[urlRequest URL] isEqual:[strongSelf.af_imageRequestOperation.request URL]]) {
                 if (failure) {

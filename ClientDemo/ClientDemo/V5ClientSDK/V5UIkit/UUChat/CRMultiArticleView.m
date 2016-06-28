@@ -7,7 +7,7 @@
 //
 
 #import "CRMultiArticleView.h"
-#include "UIImageView+V5AFNetworking.h"
+#import "V5ImageLoader.h"
 
 @implementation CRHeaderArticleView
 
@@ -45,9 +45,11 @@
 
 - (void)contentWithArticle:(V5Article *)article {
     self.headerTitle.text = article.title;
-    [self.headerPic setImageWithURL:[NSURL URLWithString:article.picUrl]
-                                     placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
-                                         failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
+    
+    [V5ImageLoader setImageView:self.headerPic
+                        withURL:article.picUrl
+               placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
+                   failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
 }
 
 @end
@@ -99,9 +101,10 @@
                                           ArticlesPicWH);
         self.itemPic.frame = CGRectNull;
     } else {
-        [self.itemPic setImageWithURL:[NSURL URLWithString:article.picUrl]
-                     placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
-                         failureImage:[UIImage imageNamed:IMGFILE(@"v5_empty_img")]];
+        [V5ImageLoader setImageView:self.itemPic
+                            withURL:article.picUrl
+                   placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
+                       failureImage:[UIImage imageNamed:IMGFILE(@"v5_empty_img")]];
     }
     self.itemTitle.text = article.title;
 }

@@ -10,6 +10,13 @@
 
 @implementation V5TextMessage
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.messageType = MessageType_Text;
+    }
+    return self;
+}
 
 - (instancetype)initWithContent:(NSString *)content {
     self = [self init];

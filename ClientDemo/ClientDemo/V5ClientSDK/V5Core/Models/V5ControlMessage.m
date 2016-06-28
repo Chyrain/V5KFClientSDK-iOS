@@ -10,6 +10,14 @@
 
 @implementation V5ControlMessage
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.messageType = MessageType_Control;
+    }
+    return self;
+}
+
 - (instancetype)initWithCode:(NSInteger)code
                         argc:(NSInteger)argc
                         argv:(NSString *)argv {

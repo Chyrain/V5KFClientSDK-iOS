@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import "UIButton+V5Color.h"
-#import "UIImageView+V5AFNetworking.h"
 #import "CRMessageFrame.h"
 #import "V5Article.h"
 

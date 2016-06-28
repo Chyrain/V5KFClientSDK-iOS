@@ -483,7 +483,7 @@ V5KW_FIX_CATEGORY_BUG_M(NSDate_V5Utils)
     //这个是相隔的秒数
     NSTimeInterval timeInterval = [startDate timeIntervalSinceDate:endDate];
     
-    // 相距5分钟显示时间Label
+    // 相距2分钟显示时间Label
     if (fabs (timeInterval) > 2*60) {
         return YES;
     } else {

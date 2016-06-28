@@ -135,7 +135,6 @@
     }
     [self addKeyBoardView]; // [修改]viewDidLoad之后添加，参数可传进VC
     [self loadBaseViewsAndData];
-    [self tableViewScrollToBottom:NO];
     
     if (![V5ClientAgent shareClient].isConnected) {
         [self startProgressHud];
@@ -262,7 +261,7 @@
 - (void)loadBaseViewsAndData {
     previousTime = 0;
     [self.chatTableView reloadData];
-    [self tableViewScrollToBottom:NO];
+    [self tableViewScrollToBottom:NO delay:YES];
 }
 
 #pragma mark ------ 横竖屏控制 ------
@@ -343,6 +342,37 @@
 }
 
 /**
+ *  tableview滑到最底部，支持延迟滑动
+ *
+ *  @param animation 是否允许动画
+ *  @param delay     是否延迟
+ */
+- (void)tableViewScrollToBottom:(BOOL)animation delay:(BOOL)delay {
+    [self.chatTableView scrollToBottom:animation];
+    // 图片加载中，等全部加载完成再滑动到底部
+    BOOL hasImage = NO;
+    if (delay) {
+        for (CRMessageFrame *msgFrame in self.dataSource) {
+            if (msgFrame.message.messageType == MessageType_Image || msgFrame.message.messageType == MessageType_Articles) {
+                hasImage = YES;
+            }
+        }
+    } else {
+        if (self.dataSource.lastObject && (self.dataSource.lastObject.message.messageType == MessageType_Image
+                || self.dataSource.lastObject.message.messageType == MessageType_Articles)) {
+            hasImage = YES;
+        }
+    }
+    if (hasImage) {
+        // 加载含图片消息需要延时滑动
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(150 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+            V5Log(@"－－－ 延迟滚动到底部");
+            [self.chatTableView scrollToBottom:animation];
+        });
+    }
+}
+
+/**
  *  显示提示信息
  *
  *  @param str 提示内容
@@ -405,14 +435,14 @@
         NSInteger size = self.messageOffset;
         self.messageOffset = 0;
         [[V5ClientAgent shareClient] getMessagesWithOffset:0 messageSize:size];
-    } else {
+    } else { // 首次打开
+        if (self.delegate && [self.delegate respondsToSelector:@selector(onClientViewConnect)]) {
+            [self.delegate onClientViewConnect];
+        }
+        
         hasConnected = YES;
         self.messageOffset = 0;
         [[V5ClientAgent shareClient] getMessagesWithOffset:0 messageSize:self.numOfMessagesOnOpen];
-    }
-    
-    if (self.delegate && [self.delegate respondsToSelector:@selector(onClientViewConnect)]) {
-        [self.delegate onClientViewConnect];
     }
 }
 
@@ -447,6 +477,15 @@
             alertView.delegate = self;
             [alertView show];
         }
+    } else if (status == Exception_Connection_Timeout) {
+        self.title = V5LocalStr(@"v5_connection_timeout", @"连接超时");
+        [self stopProgressHud];
+        //[self showToast:V5LocalStr(@"v5_network_not_reachable", @"无网络连接")];
+        //提示
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:V5LocalStr(@"v5_connection_timeout", @"连接超时") message:V5LocalStr(@"v5_check_network_retry", @"请检查网络连接后重试!") delegate:nil cancelButtonTitle:V5LocalStr(@"v5_cancel", @"取消") otherButtonTitles:V5LocalStr(@"v5_retry", @"重试"), nil];
+        alertView.tag = TAG_ALERT_RETRY;
+        alertView.delegate = self;
+        [alertView show];
     } else if (status == Exception_No_Network) {
         self.title = V5LocalStr(@"v5_network_not_reachable", @"无网络连接");
         [self stopProgressHud];
@@ -547,7 +586,7 @@
             
 //            [self dataSourceSort]; // 消息排序
             [self.chatTableView reloadData];
-            [self tableViewScrollToBottom:NO];
+            [self tableViewScrollToBottom:NO delay:YES];
             self.messageOffset += size;
         }
         if ([self.dataSource count] == 0) { // 没有消息则获取开场消息
@@ -731,7 +770,7 @@
             }
             [self addSpecifiedMessage:v5message];
             [self.chatTableView reloadData];
-            [self tableViewScrollToBottom:YES];
+            [self tableViewScrollToBottom:YES delay:NO];
             break;
             
         case MessageDir_RelativeQuestion: // 相关问题
@@ -811,7 +850,6 @@
     }
     CRMessageFrame *messageFrame = self.dataSource[indexPath.row];
     if (indexPath.row == 0) {
-//        V5Log(@"显示时间戳(tiem:%ld)：%@", (long)indexPath.row, [messageFrame.message getDefaultContent]);
         messageFrame.showTime = YES;
         [messageFrame updateFrame];
     }
@@ -826,8 +864,6 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-//    V5Log(@"<> didSelectRowAtIndexPath <> %f , %f", self.footerView.frame.origin.y, Main_Screen_Height - 100);
-//    V5Log(@"bottomHeight:%f", ((CRInputFunctionView *)self.footerView).activeView.frame.size.height);
     if (self.footerView.frame.origin.y < Main_Screen_Height - 100) {
         [self.view endEditing:YES]; // 收起软键盘
         if (((CRInputFunctionView *)self.footerView).bottomShowType != BottomTypeNone) {
@@ -837,8 +873,6 @@
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-//    V5Log(@"<> scrollViewWillBeginDragging <> %f , %f", self.footerView.frame.origin.y, Main_Screen_Height - 100);
-//    V5Log(@"bottomHeight:%f keyBoardH:%f", ((CRInputFunctionView *)self.footerView).activeView.frame.size.height, kChineseKeyboardHeight);
     if (self.footerView.frame.origin.y < Main_Screen_Height - 100) {
         [self.view endEditing:YES]; // 收起软键盘
         if (((CRInputFunctionView *)self.footerView).bottomShowType != BottomTypeNone) {
@@ -860,11 +894,13 @@
     switch (type) {
         case MessageType_Image: {
             V5ImageMessage *message = (V5ImageMessage *)cell.messageFrame.message;
+            BOOL used = NO;
             if ([self.delegate respondsToSelector:@selector(userClickImageWithImage:picUrl:)]) {
                 if (cell.btnContent.backImageView) {
-                    [self.delegate userClickImageWithImage:cell.btnContent.backImageView.image picUrl:message.picUrl];
+                    used = [self.delegate userClickImageWithImage:cell.btnContent.backImageView.image picUrl:message.picUrl];
                 }
-            } else {
+            }
+            if (!used) {
                 if (cell.btnContent.backImageView) {
                     [CRImageAvatarBrowser showImage:cell.btnContent.backImageView withURL:message.picUrl];
                 }
@@ -874,9 +910,11 @@
             
         case MessageType_Location: {
             V5LocationMessage *message = (V5LocationMessage *)cell.messageFrame.message;
+            BOOL used = NO;
             if ([self.delegate respondsToSelector:@selector(userClickLocationWithLatitude:longitude:)]) {
-                [self.delegate userClickLocationWithLatitude:message.x longitude:message.y];
-            } else {
+                used = [self.delegate userClickLocationWithLatitude:message.x longitude:message.y];
+            }
+            if (!used) {
                 if (cell.btnContent.backImageView) {
                     [CRImageAvatarBrowser showImage:cell.btnContent.backImageView withURL:nil];
                 }
@@ -953,11 +991,13 @@
     sheet.tag = TAG_AS_LINK;
     
     switch (linkType) {
-        case V5KZLinkTypeArticleURL:
+        case V5KZLinkTypeArticleURL: {
             //V5Log(@"点击图文:%@", link);
+            BOOL used = NO;
             if ([self.delegate respondsToSelector:@selector(userClickLink:linkType:)]) {
-                [self.delegate userClickLink:link linkType:LinkTypeArticle];
-            } else {
+                used = [self.delegate userClickLink:link linkType:LinkTypeArticle];
+            }
+            if (!used) {
                 NSMutableDictionary *linkDictionary = [NSMutableDictionary dictionaryWithCapacity:2];
                 [linkDictionary setObject:@(linkType) forKey:@"linkType"];
                 [linkDictionary setObject:link forKey:@"link"];
@@ -965,12 +1005,15 @@
                 [sheet showInView:self.view];
             }
             break;
+        }
         case V5KZLinkTypeHTMLHref:
-        case V5KZLinkTypeURL:
+        case V5KZLinkTypeURL: {
             //V5Log(@"点击链接:%@", link);
+            BOOL used = NO;
             if ([self.delegate respondsToSelector:@selector(userClickLink:linkType:)]) {
-                [self.delegate userClickLink:link linkType:LinkTypeURL];
-            } else {
+                used = [self.delegate userClickLink:link linkType:LinkTypeURL];
+            }
+            if (!used) {
                 NSMutableDictionary *linkDictionary = [NSMutableDictionary dictionaryWithCapacity:2];
                 [linkDictionary setObject:@(linkType) forKey:@"linkType"];
                 [linkDictionary setObject:link forKey:@"link"];
@@ -978,11 +1021,14 @@
                 [sheet showInView:self.view];
             }
             break;
-        case V5KZLinkTypePhoneNumber: // tell
+        }
+        case V5KZLinkTypePhoneNumber: { // tell
             //V5Log(@"点击号码:%@", link);
+            BOOL used = NO;
             if ([self.delegate respondsToSelector:@selector(userClickLink:linkType:)]) {
-                [self.delegate userClickLink:link linkType:LinkTypePhoneNumber];
-            } else {
+                used = [self.delegate userClickLink:link linkType:LinkTypePhoneNumber];
+            }
+            if (!used) {
                 NSMutableDictionary *linkDictionary = [NSMutableDictionary dictionaryWithCapacity:2];
                 [linkDictionary setObject:@(linkType) forKey:@"linkType"];
                 [linkDictionary setObject:link forKey:@"link"];
@@ -990,6 +1036,7 @@
                 [sheet showInView:self.view];
             }
             break;
+        }
         case V5KZLinkTypeHashTag:     // #tag
         case V5KZLinkTypeUserHandle:  // @name
             V5Log(@"点击标签:%@", link);

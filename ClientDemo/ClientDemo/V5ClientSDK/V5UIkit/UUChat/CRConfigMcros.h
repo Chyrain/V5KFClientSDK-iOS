@@ -23,12 +23,12 @@
 
 #define ArticleContentW ((Main_Screen_Width > 500 ? 500 : Main_Screen_Width) - 40.0)      //图文宽度
 #define ArticleContentH ((Main_Screen_Width > 500 ? 500 : Main_Screen_Width) - 60.0)      //图文高度
-#define ArticleFrameMargin 10                           //图文边框间隔
-#define ArticleInnerMargin 10                           //图文内容标签间隔
+#define ArticleFrameMargin 6                           //图文边框间隔
+#define ArticleInnerMargin 6                           //图文内容标签间隔
 #define ArticleImageHeight (ArticleContentW/2)          //单图文大图高度(宽度:ArticleContentW - 2*ArticleFrameMargin)
 #define ArticlesImageHeight ((ArticleContentW)*2/5)     //多图文大图高度(宽度:ArticleContentW - 2*ArticleInnerMargin)
 #define ArticlesPicWH 50                                //多图文小图标宽高
-#define ArticlesInnerMargin 6                           //多图文边框内边距
+#define ArticlesInnerMargin 4                           //多图文边框内边距
 #define ArticleBGRadius 5.0                             //图文背景圆角
 #define ArticleBGNormalColor [UIColor whiteColor]       //图文背景色
 #define ArticleBGHighlightColor RGBCOLOR(234, 234, 234) //图文高亮背景色

@@ -19,6 +19,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    userViewSomething = YES;
     // Do any additional setup after loading the view, typically from a nib.
     self.navigationController.navigationBar.translucent = YES;
 }
@@ -39,7 +40,7 @@
 
 - (IBAction)clickStartClient:(id)sender {
     /**
-     * 下面为会话界面配置选项，注释的为非必须
+     * 下面为会话界面配置选项
      */
     
     // 获得V5ClientAgent配置项
@@ -52,7 +53,10 @@
     config.nickname = @"test－iPhone5cdma";
     config.gender = 1; //性别：0-未知 1－男 2－女
     config.avatar = @"https://tcdn21.wn517.com/dev/avatar/nl2fci00fzwpx6m4o2xi.jpg@0o_0l_64w_90q_1pr.jpg"; //客户头像URL
-    config.uid = @"test-for-ios-iphone5cdma"; //用户唯一ID,区分不同登录用户
+    config.uid = @"test-for-ios-iphone5cdma-1"; //用户唯一ID,区分不同登录用户,不设置则系统自动生成此值
+    // test-for-ios-iphone5cdma -> f41381ea28265356b7ae4e6974029344
+    // null -> 0067afbb493ff8751fd30f6d9986d8b7
+    // test-for-ios-iphone5cdma1 -> f9610bc5de6cec529fe0cb89755c0abc
     
     V5ChatViewController *chatViewController = [V5ClientAgent createChatViewController];
     // 不显示底部栏（有底部栏的需加此配置）
@@ -82,9 +86,12 @@
     myBackItem.title = @"返回";
     self.navigationItem.backBarButtonItem = myBackItem;
     
-    // 设置开场白方式,启动会话前设置，默认ClientOpenModeDefault
-    // ClientOpenModeQuestion结合后台机器人培训内容可根据使用场景配置不同需求的开场消息
-    //[chatViewController setClientOpenMode:ClientOpenModeDefault withParam:nil];
+    // 设置开场白方式,启动会话前设置，默认ClientOpenModeDefault，具体说明如下:
+    // ClientOpenModeQuestion: 结合后台机器人培训内容可根据使用场景配置不同需求的开场消息
+    // ClientOpenModeDefault: param为nil时显示系统后台配置的开场白，param不为空则显示param指定内容作为开场白
+    // ClientOpenModeAutoHuman: 自动转人工客服
+    // ClientOpenModeNone: 无开场白
+    [chatViewController setClientOpenMode:ClientOpenModeDefault withParam:nil];
     
     // 启动会话界面，使用导航模式推出视图
     [self.navigationController pushViewController:chatViewController animated:YES];
@@ -127,17 +134,33 @@
 
     // 连接建立后找指定客服
     //[[V5ClientAgent shareClient] humanServiceOfGroupId:1 workerId:114053];
+    
+    // 发送图文消息示例
+//    V5ArticlesMessage *articleMsg = [[V5ArticlesMessage alloc] init];
+//    NSMutableArray *articleArray = [NSMutableArray arrayWithCapacity:1];
+//    V5Article *article = [[V5Article alloc] init];
+//    article.title = @"V5KF";
+//    article.picUrl = @"http://rs.v5kf.com/upload/10000/14568171024.png";
+//    article.url = @"http://www.v5kf.com/public/weixin/page.html?site_id=10000&id=218833&uid=3657455033351629359";
+//    article.desc = @"V5KF是围绕核心技术“V5智能机器人”研发的高品质在线客服系统。可以运用到各种领域，目前的主要产品有：微信智能云平台、网页智能客服系统...";
+//    [articleArray addObject:article];
+//    articleMsg.articles = articleArray;
+//    [[V5ClientAgent shareClient] sendMessage:articleMsg];
 }
 
 /**
  *  用户点击链接，包括普通URL(HTML超链接)、图文链接、电话号码
  *
- *  @param url 链接地址
+ *  @param url      链接地址
+ *  @param linkType 链接类型
+ *
+ *  @return 是否消费此事件(返回YES则SDK不处理此事件，否则默认处理)
  */
-//- (void)userClickLink:(NSString *)url linkType:(KV5LinkType)linkType {
-//    NSLog(@"<--- userClickLink:%@ --->", url);
-//    //可以跳转到你自己的WebView界面打开链接内容
-//}
+- (BOOL)userClickLink:(NSString *)url linkType:(KV5LinkType)linkType {
+    NSLog(@"<--- userClickLink:%@ ---> linkType:%ld", url, (long)linkType);
+    //可以跳转到你自己的WebView界面打开链接内容
+    return NO;
+}
 
 /**
  *  用户点击位置消息
@@ -145,9 +168,10 @@
  *  @param lat 纬度
  *  @param lng 经度
  */
-//- (void)userClickLocationWithLatitude:(double)lat longitude:(double)lng {
+//- (BOOL)userClickLocationWithLatitude:(double)lat longitude:(double)lng {
 //    NSLog(@"<--- userClickLocationWithLat:%lf lng:%lf --->", lat, lng);
 //    //可以跳转到你自己的位置查看页面
+//    //return NO;
 //}
 
 /**
@@ -156,9 +180,10 @@
  *  @param image 图片
  *  @param url   图片链接
  */
-//- (void)userClickImageWithImage:(UIImage *)image picUrl:(NSString *)url {
+//- (BOOL)userClickImageWithImage:(UIImage *)image picUrl:(NSString *)url {
 //    NSLog(@"<--- userClickImageWithImage:%@ --->", url);
 //    //可以跳转到你自己的图片查看界面
+//    //return NO;
 //}
 
 /**

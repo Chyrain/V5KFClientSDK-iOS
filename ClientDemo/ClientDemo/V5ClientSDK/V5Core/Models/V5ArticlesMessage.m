@@ -10,6 +10,14 @@
 
 @implementation V5ArticlesMessage
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.messageType = MessageType_Articles;
+    }
+    return self;
+}
+
 - (instancetype)initWithJSON:(NSDictionary *)data {
     self = [super initWithJSON:data];
     if (self) {

@@ -115,6 +115,7 @@ typedef NS_ENUM(NSInteger, KV5ExceptionStatus) {
     Exception_Message_SendFailed,       // 消息发送失败
     Exception_Image_UploadFailed,       // 图片上传失败
     Exception_No_Network,               // 没有网络
+    Exception_Connection_Timeout,       // 连接超时
     Exception_Connection_Error,         // 网络请求错误
     //Exception_User_IsOffline,           // 顾客为离线状态，当前操作无法操作
     //Exception_ServiceError,             // 服务器出错
@@ -138,7 +139,7 @@ typedef NS_ENUM(NSInteger, KV5ExceptionStatus) {
 };
 
 typedef NS_ENUM(NSInteger, KV5ClientOpenMode) {
-    ClientOpenModeDefault = 0,          // 默认开场方式（无消息记录显示默认开场白，否则显示历史消息）
+    ClientOpenModeDefault = 0,          // 默认开场方式（无消息记录显示默认开场白，带参则参数作为开场白，否则显示历史消息）
     ClientOpenModeQuestion = 1,         // 自定义开场白，设置开场问题获得对应开场白
     ClientOpenModeNone = 2,             // 无开场白方式，有则显示历史消息
     ClientOpenModeAutoHuman = 3         // 开场自动转人工客服

@@ -153,7 +153,12 @@
 //            [JSONObj setObject:@(self.createTime) forKey:@"create_time"];
 //        }
         if (self.customContent) {
-            [JSONObj setObject:self.customContent forKey:@"custom_content"];
+            NSMutableArray *cstmContentArray = [NSMutableArray arrayWithCapacity:self.customContent.count];
+            for (NSString *key in self.customContent.allKeys) {
+                [cstmContentArray addObject:@{@"key" : key, @"val" : self.customContent[key]}];
+            }
+            
+            [JSONObj setObject:cstmContentArray forKey:@"custom_content"];
         }
         if (self.candidate) {
             NSMutableArray *candidateArray = [NSMutableArray arrayWithCapacity:1];

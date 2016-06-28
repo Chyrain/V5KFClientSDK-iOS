@@ -10,6 +10,14 @@
 
 @implementation V5LocationMessage
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.messageType = MessageType_Location;
+    }
+    return self;
+}
+
 /**
  *  初始化位置消息
  *

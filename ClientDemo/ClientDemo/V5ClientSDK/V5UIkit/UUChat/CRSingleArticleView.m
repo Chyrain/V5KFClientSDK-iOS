@@ -7,6 +7,7 @@
 //
 
 #import "CRSingleArticleView.h"
+#import "V5ImageLoader.h"
 
 @interface CRSingleArticleView () {
     UILabel *bottomMore;
@@ -64,9 +65,10 @@
     self.articleTitle.text = article.title;
     self.articleDesc.text = article.desc;
     if (article.picUrl) {
-        [self.articlePic setImageWithURL:[NSURL URLWithString:article.picUrl]
-                        placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
-                            failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
+        [V5ImageLoader setImageView:self.articlePic
+                            withURL:article.picUrl
+                   placeholderImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_loading")]
+                       failureImage:[UIImage imageNamed:IMGFILE(@"v5_chat_image_failure")]];
     }
     
     CGFloat currentY = 0;

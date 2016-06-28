@@ -11,6 +11,14 @@
 
 @implementation V5ImageMessage
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.messageType = MessageType_Image;
+    }
+    return self;
+}
+
 - (instancetype)initWithPicUrl:(NSString *)picUrl mediaId:(NSString *)mediaId {
     self = [self init];
     if (self) {

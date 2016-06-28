@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UIButton+V5AFNetworking.h"
 #import "V5KZLinkLabel.h"
 
 @interface CRMessageContentButton : UIButton

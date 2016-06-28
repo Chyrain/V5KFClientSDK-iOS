@@ -14,7 +14,7 @@
 // debug连接模式
 //#define V5_DEBUG
 
-#define V5_VERSION @"1.1.3" // v1.1.3_r0525
+#define V5_VERSION @"1.1.6" // v1.1.6_r0627
 
 // 启用log打印，默认1-启用/0-禁用
 #ifdef DEBUG
@@ -81,6 +81,8 @@
 
 // 连接地址、认证地址等URL格式字符串
 #define V5_INIT_URL         (@"http://www.v5kf.com/public/appsdk/init")
+// 站点信息
+#define V5_SITE_INFO_FMT    (@"http://www.v5kf.com/public/api_dkf/get_chat_siteinfo?sid=%@")
 
 #ifdef V5_DEBUG
 #define WS_URL_FMT          (@"wss://chat.v5kf.com/debug/appws/v2?auth=%@")

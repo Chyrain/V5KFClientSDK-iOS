@@ -304,7 +304,10 @@ static id _instance = nil;
     }
     NSString *auth = self.config.authorization;
     NSString *urlString = [NSString stringWithFormat:WS_URL_FMT, auth];
-    self.webSocket = [[V5SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]
+                                             cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                         timeoutInterval:10.0]; // 超时10s
+    self.webSocket = [[V5SRWebSocket alloc] initWithURLRequest:request];
     self.webSocket.delegate = delegate;
     [self.webSocket open];
     V5Log(@"\n>>> open success! URL:%@", urlString);
@@ -391,6 +394,47 @@ static id _instance = nil;
             [self.messageDelegate receiveExceptionStatus:Exception_Account_Failed
                                                     desc:@"account auth failed"];
         }
+    }];
+}
+
+- (void)getSiteInfo {
+    NSString *url = [NSString stringWithFormat:V5_SITE_INFO_FMT, self.config.site];
+    
+    V5AFSecurityPolicy *securityPolicy = [V5AFSecurityPolicy defaultPolicy];
+    securityPolicy.allowInvalidCertificates = YES;
+    V5AFHTTPRequestOperationManager *manager = [V5AFHTTPRequestOperationManager manager];
+    manager.securityPolicy = securityPolicy;
+    manager.responseSerializer = [V5AFJSONResponseSerializer serializer];
+    manager.requestSerializer = [V5AFJSONRequestSerializer serializer];
+    [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+    [manager.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    
+    [manager GET:url parameters:nil success:^(V5AFHTTPRequestOperation *operation, id responseObject) {
+        V5Log(@"[requestSiteInfo] success:%@", [responseObject description]);
+        NSDictionary *dic = nil;
+        if ([responseObject isKindOfClass:[NSDictionary class]]) {
+            dic = responseObject;
+        } else if ([responseObject isKindOfClass:[NSString class]]) {
+            NSData *jsonData = [(NSString *)responseObject dataUsingEncoding:NSUTF8StringEncoding];
+            dic = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:nil];
+        } else {
+            NSData *jsonData = [[responseObject description] dataUsingEncoding:NSUTF8StringEncoding];
+            dic = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:nil];
+        }
+        NSString *state = [dic objectForKey:@"state"];
+        if ([state isEqualToString:@"ok"]) {
+            NSString *intro = [[dic objectForKey:@"robot"] objectForKey:@"intro"];
+            if (intro) {
+                [self sendPrologue:intro];
+                return;
+            }
+        } else {
+            V5Log(@"[requestSiteInfo] error: state not ok");
+        }
+        [self sendPrologue:V5LocalStr(@"v5_start_message", @"您好，我是小五，请问有什么能帮到您的吗？")];
+    } failure:^(V5AFHTTPRequestOperation *operation, NSError *error) {
+        V5Log(@"[requestSiteInfo] error:%@", [error description]);
+        [self sendPrologue:V5LocalStr(@"v5_start_message", @"您好，我是小五，请问有什么能帮到您的吗？")];
     }];
 }
 
@@ -591,8 +635,13 @@ static id _instance = nil;
                 
             } else {
                 if (error.code == 57 || !error.userInfo[@"HTTPResponseStatusCode"]) { // 无网络
-                    [self.messageDelegate receiveExceptionStatus:Exception_No_Network
-                                                            desc:@"Network not reachable"];
+                    if ([[error description] containsString:@"Timeout"]) {
+                        [self.messageDelegate receiveExceptionStatus:Exception_Connection_Timeout
+                                                                desc:@"Connection timeout"];
+                    } else {
+                        [self.messageDelegate receiveExceptionStatus:Exception_No_Network
+                                                                desc:@"Network not reachable"];
+                    }
                 } else {
                     [self.messageDelegate receiveExceptionStatus:Exception_Connection_Error
                                                             desc:@"Connection error"];
@@ -1281,6 +1330,19 @@ static id _instance = nil;
 //    [self shouldClientOnline];
 //}
 
+- (void)sendPrologue:(NSString *)prologue {
+    V5TextMessage *textMsg = [V5MessageManager obtainTextMessageWithContent:prologue];
+    textMsg.direction = MessageDir_FromRobot;
+    textMsg.msgId = [[NSDate date] timeIntervalSince1970];
+    //        if (V5DatabaseEnable) {
+    //            [self.dbHelper insertMessage:textMsg force:YES];
+    //        }
+    // 接收V5Message消息回调
+    if (self.messageDelegate) {
+        [self.messageDelegate receiveV5Message:textMsg];
+    }
+}
+
 /**
  *  获得开场消息
  *
@@ -1289,17 +1351,12 @@ static id _instance = nil;
  */
 - (void)getOpeningMessageOfMode:(KV5ClientOpenMode)mode withParam:(nullable NSString *)param {
     if (mode == ClientOpenModeDefault) {
-        NSString *startMessage = V5LocalStr(@"start_message", @"您好，我是智能客服机器人小五，请问有什么能帮到您的吗？");
-        V5TextMessage *textMsg = [V5MessageManager obtainTextMessageWithContent:startMessage];
-        textMsg.direction = MessageDir_FromRobot;
-        textMsg.msgId = [[NSDate date] timeIntervalSince1970];
-//        if (V5DatabaseEnable) {
-//            [self.dbHelper insertMessage:textMsg force:YES];
-//        }
-        // 接收V5Message消息回调
-        if (self.messageDelegate) {
-            [self.messageDelegate receiveV5Message:textMsg];
+        if (param) {
+            [self sendPrologue:param];
+        } else {
+            [self getSiteInfo];
         }
+        
     } else if (mode == ClientOpenModeQuestion && param) {
         V5TextMessage *openQuestion = [V5MessageManager obtainTextMessageWithContent:param];
         openQuestion.msgId = [[NSDate date] timeIntervalSince1970];
